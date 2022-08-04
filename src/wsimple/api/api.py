@@ -709,6 +709,23 @@ class Wsimple:
         )
 
     @_manage_tokens
+    def find_securities_quote(
+            self,
+            sec_id: str,
+            tokens=None,
+    ):
+        """
+        Grabs information about the security resembled by the security id.
+        Where ***ticker*** is the ticker of the company. security_id
+        """
+        return requestor(
+            Endpoints.FIND_SECURITIES_QUOTE,
+            args={"base": self.BASE_URL, "security_id": sec_id},
+            headers=tokens[0],
+            logger=self.logger,
+        )
+
+    @_manage_tokens
     def find_securities_by_id_historical(
         self, sec_id: str, tokens=None, time: str = "1d", mic: str = "XNAS"
     ):

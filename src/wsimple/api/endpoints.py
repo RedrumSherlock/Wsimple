@@ -31,6 +31,7 @@ class Endpoints(Enum):
 
     FIND_SECURITIES = Route("{base}securities", "GET")
     FIND_SECURITIES_BY_ID = Route("{base}securities/{security_id}", "GET")
+    FIND_SECURITIES_QUOTE = Route("{base}quotes/{security_id}", "GET")
     FIND_SECURITIES_HISTORY = Route(
         "{base}securities/{security_id}/historical_quotes/{time}", "GET"
     )
