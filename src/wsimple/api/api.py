@@ -32,6 +32,7 @@ class Wsimple:
     """Wsimple is the main access class to the wealthsimple api."""
 
     BASE_URL = Endpoints.BASE.value
+    BASE_AUTH_URL = Endpoints.BASE_AUTH.value
     BASE_PUBLIC_URL = Endpoints.BASE_PUBLIC.value
     BASE_STATUS_URL = Endpoints.BASE_STATUS.value
 
@@ -106,6 +107,7 @@ class Wsimple:
         tokens: Optional[list] = None,
         internally_manage_tokens: bool = True,
         otp_callback: Callable[[], int] = None,
+        token_expiry: datetime = None
     ):
         """
         Wsimple._\_\_init_\_\_() initializes the Wsimple class and logs the user in using
@@ -129,6 +131,11 @@ class Wsimple:
         elif self.oauth_mode:
             self.logger.info("Mode: Oauth (Bypass)")
             self.tokens = tokens
+            self.box = TokensBox(
+                tokens[0]["Authorization"],
+                tokens[1]["refresh_token"],
+                token_expiry,
+            )
         else:
             payload = {"email": email, "password": password}
             r = requestor(
@@ -1318,6 +1325,16 @@ class Wsimple:
                 res.ticket
             )
         )
+
+    def refresh_expiring_access_tokens(self):
+        if self.internally_manage_tokens:
+            diff = self.box.access_expires - datetime.now()
+            self.logger.debug(f"Reset in -> {diff}")
+            if diff < timedelta(minutes=15):
+                self.logger.info(f"tokens expiring in {diff}, refreshing access token now")
+                self.box = self.refresh_token(tokens=self.box.tokens)
+                self.logger.debug(f"new tokens received {self.box}")
+
 
     def is_operational(self):
         """checks if wealthsimple platform is currently working
